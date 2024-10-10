@@ -1,0 +1,55 @@
+# Data Configuration
+data:
+  raw_audio_dir: "data/raw"
+  processed_audio_dir: "data/processed"
+  features_dir: "data/features"
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+  sample_rate: 16000
+  max_duration: 60  # maximum audio duration in seconds
+
+# Audio Processing
+audio:
+  normalize_audio: true
+  trim_silence: true
+  silence_threshold: 0.05
+
+# Wav2Vec2 Configuration
+wav2vec2:
+  model_name: "facebook/wav2vec2-large-xlsr-53"
+  freeze_feature_encoder: true
+  hidden_dropout: 0.1
+  attention_dropout: 0.1
+  feat_proj_dropout: 0.0
+  mask_time_prob: 0.05
+  layerdrop: 0.1
+
+# Speaker Diarization Configuration
+diarization:
+  embedding_model: "speechbrain/spkrec-xvect-voxceleb"
+  min_speakers: 1
+  max_speakers: 4
+  clustering_method: "kmeans"
+  segment_length: 3.0  # seconds
+  overlap: 1.5  # seconds
+
+# Training Configuration
+training:
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2e-5
+  num_epochs: 50
+  warmup_steps: 500
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  fp16: true  # Enable mixed precision training
+  logging_steps: 100
+  save_steps: 1000
+  eval_steps: 500
+
+# Device Configuration
+device:
+  use_cuda: true
+  cuda_device: 0
+  seed: 42
