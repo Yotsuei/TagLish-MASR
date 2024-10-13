@@ -7,40 +7,38 @@ This project focuses on fine-tuning a Wav2Vec2 model for Tagalog-English (TagLis
 ```
 TagLish-MASR/
 ├── config/
-│   └── config.yaml              # Configuration file with model and training settings
+│   └── config.yaml
 ├── data/
-│   ├── raw/                     # Directory for raw audio files
-│   ├── processed/               # Processed dataset folder
-│   └── features/                # Directory for extracted features
+│   ├── raw/
+│   ├── processed/
+│   └── features/
 ├── models/
-│   ├── checkpoints/             # Folder for saving model checkpoints
-│   └── pretrained/              
-│       └── wav2vec2-large-xlsr-53/   # Downloaded Wav2Vec2 model files (pytorch_model.bin, config.json, etc.)
-├── scripts/
-│   ├── download_model.py        # Script to download the Wav2Vec2 model locally
-│   └── prepare_data.py          # Data preparation script
+│   ├── checkpoints/
+│   └── pretrained/
 ├── src/
 │   ├── data/
-│   │   ├── __init__.py          # Initialization for data module
-│   │   ├── preprocessor.py      # Data preprocessing script
-│   │   └── dataset.py           # Custom dataset handling
+│   │   ├── __init__.py
+│   │   ├── preprocessor.py
+│   │   └── dataset.py
 │   ├── models/
-│   │   ├── __init__.py          # Initialization for models module
-│   │   ├── wav2vec2_model.py    # Model file (to be implemented for Wav2Vec2)
-│   │   └── speaker_diarization.py # Implementation for x-vector speaker diarization
+│   │   ├── __init__.py
+│   │   ├── wav2vec2_model.py
+│   │   └── speaker_diarization.py
 │   ├── training/
-│   │   ├── __init__.py          # Initialization for training module
-│   │   ├── trainer.py           # Model training logic
-│   │   └── validator.py         # Validation logic during training
+│   │   ├── __init__.py
+│   │   ├── trainer.py
+│   │   └── validator.py
 │   ├── utils/
-│   │   ├── __init__.py          # Initialization for utils module
-│   │   ├── audio_utils.py       # Utilities for handling audio processing
-│   │   └── config_utils.py      # Utilities for handling configuration settings
-│   └── train.py                 # Main training script
-├── .env                         # Environment file for sensitive credentials (e.g., API keys)
-├── .env.template                 # Template for environment variables
-├── requirements.txt             # Python dependencies list (to be updated)
-└── README.md                    # Project documentation
+│   │   ├── __init__.py
+│   │   ├── audio_utils.py
+│   │   └── config_utils.py
+│   └── train.py
+├── scripts/
+│   └── prepare_data.py
+├── .env
+├── .env.template
+├── requirements.txt
+└── README.md
 
 ```
 
