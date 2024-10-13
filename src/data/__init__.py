@@ -1,2 +1,4 @@
+from .preprocessor import AudioPreprocessor
 from .dataset import SpeechDataset
-from .preprocessor import preprocess_audio
+
+__all__ = ['AudioPreprocessor', 'SpeechDataset']

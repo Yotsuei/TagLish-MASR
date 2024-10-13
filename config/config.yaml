@@ -1,60 +1,81 @@
-# config/config.yaml
+# Project Configuration for TagLish: Fine-Tuning Wav2Vec Model
 
-# General configuration
-project_name: "TagLish: Code-Switched Speech Recognition"
+# General Settings
+project_name: "TagLish"
 version: "1.0"
+description: "Fine-Tuning Wav2Vec Model for Code-Switched Speech Recognition"
 
 # Paths
 paths:
-  raw_data_dir: "data/raw/"
-  processed_data_dir: "data/processed/"
-  features_dir: "data/features/"
-  checkpoints_dir: "models/checkpoints/"
-  pretrained_model_dir: "models/pretrained/"
-  logs_dir: "logs/"
-  output_dir: "output/"
-  # Add the path where the downloaded model is stored
-  download_model_script: "scripts/download_model.py"
+  raw_data: "data/raw/"
+  processed_data: "data/processed/"
+  features_data: "data/features/"
+  model_checkpoints: "models/checkpoints/"
+  pretrained_models: "models/pretrained/"
+  audio_files: "data/raw/audio/"   # Path to the raw audio files
+  config_file: "config/config.yaml"
+  tokenizer_dir: "models/pretrained/tokenizer/"  # Tokenizer storage path
 
-# Model configuration
-model:
-  wav2vec2_model_name: "facebook/wav2vec2-large-xlsr-53"
-  use_pretrained: True
-  pretrained_model_path: "models/pretrained/wav2vec2-large-xlsr-53"
-  num_languages: 2  # Tagalog-English code-switched
-  
-# Speaker Diarization - X-vector
-xvector_diarization:
-  embedding_dim: 512  # Change as needed for x-vector
-  num_speakers: 2  # Initially assuming 2 speakers for multi-speaker ID
-  diarization_method: "x-vector"
+# Wav2Vec Model Configuration
+wav2vec:
+  model_name: "facebook/wav2vec2-large-xlsr-53"
+  fine_tune: true
+  num_labels: 2  # Number of output classes for Tagalog-English
+  dropout_rate: 0.1  # Dropout rate for regularization
 
-# Dataset configuration
-dataset:
-  sample_rate: 16000  # Wav2Vec2 typically uses 16kHz audio
-  batch_size: 16  # Modify based on available memory
-  shuffle: True
-  num_workers: 4  # For data loading
-
-# Training configuration
+# Training Configuration
 training:
-  epochs: 20
-  learning_rate: 1e-4
-  optimizer: "adam"
-  loss_function: "ctc_loss"
-  validation_split: 0.1  # 10% data for validation
-  early_stopping: True
-  patience: 5  # Stop training if no improvement for 5 epochs
+  epochs: 20  # Number of training epochs
+  batch_size: 16  # Batch size for training
+  learning_rate: 5e-5  # Learning rate
+  weight_decay: 0.01  # Weight decay for optimizer
+  validation_split: 0.1  # Fraction of the dataset to be used for validation
+  use_gpu: true  # Set to true to use GPU if available
+  early_stopping:
+    patience: 3  # Number of epochs with no improvement after which training will be stopped
+    delta: 0.001  # Minimum change to qualify as an improvement
 
-# GPU configuration
-device:
-  use_gpu: True  # Enable this to use GPU
-  gpu_id: 0  # Modify if using specific GPU
-  
-# Logging and checkpointing
+# Speaker Diarization Configuration
+speaker_diarization:
+  use_x_vector: true  # Enable x-vector speaker diarization
+  num_speakers: 2  # Number of speakers to identify (adjust as needed)
+  embedding_dim: 512  # Dimensionality of x-vector embeddings
+  distance_threshold: 0.5  # Distance threshold for speaker clustering
+
+# Preprocessing Configuration
+preprocessing:
+  sample_rate: 16000  # Resample audio to 16 kHz
+  vad: true  # Apply voice activity detection
+  normalize_amplitude: true  # Normalize audio amplitude
+
+# Feature Extraction Configuration
+feature_extraction:
+  use_mfcc: true  # Use MFCCs as input features
+  frame_length: 0.025  # Frame length of 25ms
+  frame_step: 0.010  # Step of 10ms
+  num_mfcc: 23  # Number of MFCC features per frame
+
+# X-vector Extraction Configuration
+x_vector_extraction:
+  use_tdnn: true  # Use TDNN architecture for x-vector extraction
+  tdnn_training_dataset: "VoxCeleb"  # Dataset for TDNN training (using transfer learning)
+  simplified_tdnn: true  # Use a simplified TDNN architecture
+  embedding_layer: "tdnn_embedding"  # Layer from which to extract x-vectors
+  data_augmentation: true  # Enable data augmentation to help with limited dataset
+  regularization:
+    dropout: 0.5  # Dropout rate for regularization
+    weight_decay: 0.01  # Weight decay to prevent overfitting
+
+# Clustering Configuration
+clustering:
+  use_data_augmentation: true  # Use data augmentation techniques
+  clustering_algorithm: "AHC"  # Clustering algorithm (Agglomerative Hierarchical Clustering)
+  plda_scoring: true  # Use PLDA scoring for measuring similarity between x-vectors
+
+# Logging and Checkpointing
 logging:
-  log_interval: 100  # Log after every 100 batches
-  checkpoint_interval: 1  # Save checkpoint after every epoch
-  tensorboard: True  # Enable TensorBoard logging
+  log_file: "logs/training.log"  # Path to the log file
+  save_checkpoints: true  # Save model checkpoints during training
 
-# Placeholder for additional configuration settings
+# Seed for Reproducibility
+seed: 42

@@ -5,7 +5,7 @@ class AudioPreprocessor:
     def __init__(self, sample_rate=16000, normalize=True):
         """
         Initializes the preprocessor with a target sample rate and normalization option.
-        :param sample_rate: The target sample rate for resampling audio.
+        :param sample_rate: The target sample rate for resampling audio (Wav2Vec2 expects 16kHz).
         :param normalize: Whether to normalize the audio waveform.
         """
         self.sample_rate = sample_rate
@@ -18,7 +18,7 @@ class AudioPreprocessor:
         :param input_sample_rate: The sample rate of the input audio.
         :return: Processed waveform.
         """
-        # Resample if input sample rate is different from the desired sample rate
+        # Resample if input sample rate is different from the desired sample rate (16kHz)
         if input_sample_rate != self.sample_rate:
             resampler = Resample(input_sample_rate, self.sample_rate)
             waveform = resampler(waveform)
@@ -36,4 +36,3 @@ class AudioPreprocessor:
         :return: Normalized waveform tensor.
         """
         return waveform / waveform.abs().max()
-

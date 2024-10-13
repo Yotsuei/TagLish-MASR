@@ -1,37 +1,58 @@
-# dataset.py
-
 import os
+import torchaudio
 from torch.utils.data import Dataset
-from src.utils.audio_utils import load_audio, audio_to_tensor, normalize_audio
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+from preprocessor import AudioPreprocessor
 
-class SpeechDataset(Dataset):
-    def __init__(self, data_dir, file_list, transform=None):
+class TagLishDataset(Dataset):
+    def __init__(self, data_dir, split="train", sample_rate=16000, normalize=True, test_size=0.2, random_seed=42):
         """
-        Custom dataset for loading audio data.
+        Initializes the dataset by splitting the data into train and test sets, applying preprocessing.
+        :param data_dir: Directory where the raw audio data is stored.
+        :param split: "train" or "test" to determine the dataset split.
+        :param sample_rate: Target sample rate for audio (Wav2Vec2 expects 16000 Hz).
+        :param normalize: Whether to normalize the audio waveform.
+        :param test_size: Proportion of data to be used for the test set.
+        :param random_seed: Seed for reproducibility in train-test split.
+        """
+        self.data_dir = Path(data_dir)
+        self.split = split
+        self.preprocessor = AudioPreprocessor(sample_rate=sample_rate, normalize=normalize)
 
-        :param data_dir: Directory where audio files are located.
-        :param file_list: List of audio file names to be used in the dataset.
-        :param transform: Optional transforms to be applied on the audio (e.g., augmentation).
-        """
-        self.data_dir = data_dir
-        self.file_list = file_list
-        self.transform = transform
+        # Load all audio files (.wav format)
+        all_audio_files = list(self.data_dir.glob("**/*.wav"))
+
+        # Perform train-test split
+        train_files, test_files = train_test_split(
+            all_audio_files, test_size=test_size, random_state=random_seed
+        )
+
+        # Set dataset based on the split
+        if self.split == "train":
+            self.audio_files = train_files
+        else:
+            self.audio_files = test_files
 
     def __len__(self):
-        return len(self.file_list)
+        return len(self.audio_files)
 
     def __getitem__(self, idx):
-        audio_path = os.path.join(self.data_dir, self.file_list[idx])
-        
-        # Load audio using the utility function
-        audio, sr = load_audio(audio_path)
-        
-        # Convert to tensor and normalize
-        audio_tensor = audio_to_tensor(audio)
-        normalized_audio = normalize_audio(audio_tensor)
+        """
+        Retrieves an audio sample and applies preprocessing (resampling, normalization).
+        :param idx: Index of the sample.
+        :return: A dictionary containing the audio file path and the processed audio tensor.
+        """
+        audio_path = self.audio_files[idx]
 
-        # Apply any transformations (if provided)
-        if self.transform:
-            normalized_audio = self.transform(normalized_audio)
+        # Load the audio file using torchaudio (as Wav2Vec2 expects raw waveforms)
+        waveform, sample_rate = torchaudio.load(audio_path)
 
-        return normalized_audio, sr
+        # Preprocess the audio (resampling, normalization)
+        processed_waveform = self.preprocessor.process(waveform, sample_rate)
+
+        return {
+            "audio_path": audio_path,
+            "waveform": processed_waveform,
+            "sample_rate": self.preprocessor.sample_rate,
+        }
