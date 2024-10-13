@@ -1,15 +1,15 @@
-torch>=2.0.0
-torchaudio>=2.0.0
-transformers>=4.30.0
-datasets>=2.12.0
-numpy>=1.24.0
-pandas>=2.0.0
-speechbrain>=0.5.15
-scipy>=1.10.0
-librosa>=0.10.0
-soundfile>=0.12.0
-pyyaml>=6.0.0
-tqdm>=4.65.0
-scikit-learn>=1.2.0
-wandb>=0.15.0  # for experiment tracking
-tensorboard>=2.13.0
+# requirements.txt
+
+torch>=2.0  # For model training, with GPU support
+torchaudio>=2.0  # For working with audio data
+transformers>=4.30.0  # For using the Wav2Vec2 model
+datasets>=2.8.0  # For managing datasets, loading and preprocessing
+scikit-learn>=1.2.0  # For diarization, clustering, and evaluation
+pydub>=0.25.1  # For audio file processing
+soundfile>=0.11.0  # For reading and writing audio files
+librosa>=0.10.0  # For additional audio feature extraction
+tensorboard>=2.10  # For logging training progress
+numpy>=1.23.0  # General numerical computation
+scipy>=1.10.0  # For signal processing and clustering tasks
+tqdm>=4.64.0  # For progress bars during data loading and training
+pytorch_lightning>=2.0  # Optional: Simplify training loops and GPU handling

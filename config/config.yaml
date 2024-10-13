@@ -1,55 +1,60 @@
-# Data Configuration
-data:
-  raw_audio_dir: "data/raw"
-  processed_audio_dir: "data/processed"
-  features_dir: "data/features"
-  train_split: 0.8
-  val_split: 0.1
-  test_split: 0.1
-  sample_rate: 16000
-  max_duration: 60  # maximum audio duration in seconds
+# config/config.yaml
 
-# Audio Processing
-audio:
-  normalize_audio: true
-  trim_silence: true
-  silence_threshold: 0.05
+# General configuration
+project_name: "TagLish: Code-Switched Speech Recognition"
+version: "1.0"
 
-# Wav2Vec2 Configuration
-wav2vec2:
-  model_name: "facebook/wav2vec2-large-xlsr-53"
-  freeze_feature_encoder: true
-  hidden_dropout: 0.1
-  attention_dropout: 0.1
-  feat_proj_dropout: 0.0
-  mask_time_prob: 0.05
-  layerdrop: 0.1
+# Paths
+paths:
+  raw_data_dir: "data/raw/"
+  processed_data_dir: "data/processed/"
+  features_dir: "data/features/"
+  checkpoints_dir: "models/checkpoints/"
+  pretrained_model_dir: "models/pretrained/"
+  logs_dir: "logs/"
+  output_dir: "output/"
+  # Add the path where the downloaded model is stored
+  download_model_script: "scripts/download_model.py"
 
-# Speaker Diarization Configuration
-diarization:
-  embedding_model: "speechbrain/spkrec-xvect-voxceleb"
-  min_speakers: 1
-  max_speakers: 4
-  clustering_method: "kmeans"
-  segment_length: 3.0  # seconds
-  overlap: 1.5  # seconds
+# Model configuration
+model:
+  wav2vec2_model_name: "facebook/wav2vec2-large-xlsr-53"
+  use_pretrained: True
+  pretrained_model_path: "models/pretrained/wav2vec2-large-xlsr-53"
+  num_languages: 2  # Tagalog-English code-switched
+  
+# Speaker Diarization - X-vector
+xvector_diarization:
+  embedding_dim: 512  # Change as needed for x-vector
+  num_speakers: 2  # Initially assuming 2 speakers for multi-speaker ID
+  diarization_method: "x-vector"
 
-# Training Configuration
+# Dataset configuration
+dataset:
+  sample_rate: 16000  # Wav2Vec2 typically uses 16kHz audio
+  batch_size: 16  # Modify based on available memory
+  shuffle: True
+  num_workers: 4  # For data loading
+
+# Training configuration
 training:
-  batch_size: 4
-  gradient_accumulation_steps: 4
-  learning_rate: 2e-5
-  num_epochs: 50
-  warmup_steps: 500
-  weight_decay: 0.01
-  max_grad_norm: 1.0
-  fp16: true  # Enable mixed precision training
-  logging_steps: 100
-  save_steps: 1000
-  eval_steps: 500
+  epochs: 20
+  learning_rate: 1e-4
+  optimizer: "adam"
+  loss_function: "ctc_loss"
+  validation_split: 0.1  # 10% data for validation
+  early_stopping: True
+  patience: 5  # Stop training if no improvement for 5 epochs
 
-# Device Configuration
+# GPU configuration
 device:
-  use_cuda: true
-  cuda_device: 0
-  seed: 42
+  use_gpu: True  # Enable this to use GPU
+  gpu_id: 0  # Modify if using specific GPU
+  
+# Logging and checkpointing
+logging:
+  log_interval: 100  # Log after every 100 batches
+  checkpoint_interval: 1  # Save checkpoint after every epoch
+  tensorboard: True  # Enable TensorBoard logging
+
+# Placeholder for additional configuration settings

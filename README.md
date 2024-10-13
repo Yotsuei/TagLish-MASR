@@ -7,33 +7,41 @@ This project focuses on fine-tuning a Wav2Vec2 model for Tagalog-English (TagLis
 ```
 TagLish-MASR/
 ├── config/
-│   └── config.yaml                  # Configuration file for model, training, data paths, etc.
+│   └── config.yaml              # Configuration file with model and training settings
 ├── data/
-│   ├── raw/                         # Raw audio data
-│   ├── processed/                   # Processed audio data (features, resampled, etc.)
-│   └── features/                    # Extracted features from the data
+│   ├── raw/                     # Directory for raw audio files
+│   ├── processed/               # Processed dataset folder
+│   └── features/                # Directory for extracted features
 ├── models/
-│   ├── checkpoints/                 # Checkpoints saved during training
-│   └── pretrained/                  # Pretrained models (Wav2Vec2, x-vector)
+│   ├── checkpoints/             # Folder for saving model checkpoints
+│   └── pretrained/              
+│       └── wav2vec2-large-xlsr-53/   # Downloaded Wav2Vec2 model files (pytorch_model.bin, config.json, etc.)
+├── scripts/
+│   ├── download_model.py        # Script to download the Wav2Vec2 model locally
+│   └── prepare_data.py          # Data preparation script
 ├── src/
-│   ├── data/                        # Data handling scripts
-│   │   ├── __init__.py
-│   │   ├── preprocessor.py          # Preprocessing audio files
-│   │   └── dataset.py               # Dataset and dataloaders
-│   ├── models/                      # Model architectures
-│   │   ├── __init__.py
-│   │   ├── wav2vec2_model.py        # Wav2Vec2-based speech recognition model
-│   │   └── speaker_diarization.py   # X-vector-based speaker diarization model
-│   ├── training/                    # Training and validation logic
-│   │   ├── __init__.py
-│   │   ├── trainer.py               # Training loop
-│   │   └── validator.py             # Validation loop
-│   ├── utils/                       # Utility functions
-│   │   ├── __init__.py
-│   │   └── audio_utils.py           # Audio processing utilities
-│   └── train.py                     # Main training script
-├── requirements.txt                 # Required dependencies
-└── README.md                        # This README file
+│   ├── data/
+│   │   ├── __init__.py          # Initialization for data module
+│   │   ├── preprocessor.py      # Data preprocessing script
+│   │   └── dataset.py           # Custom dataset handling
+│   ├── models/
+│   │   ├── __init__.py          # Initialization for models module
+│   │   ├── wav2vec2_model.py    # Model file (to be implemented for Wav2Vec2)
+│   │   └── speaker_diarization.py # Implementation for x-vector speaker diarization
+│   ├── training/
+│   │   ├── __init__.py          # Initialization for training module
+│   │   ├── trainer.py           # Model training logic
+│   │   └── validator.py         # Validation logic during training
+│   ├── utils/
+│   │   ├── __init__.py          # Initialization for utils module
+│   │   ├── audio_utils.py       # Utilities for handling audio processing
+│   │   └── config_utils.py      # Utilities for handling configuration settings
+│   └── train.py                 # Main training script
+├── .env                         # Environment file for sensitive credentials (e.g., API keys)
+├── .env.template                 # Template for environment variables
+├── requirements.txt             # Python dependencies list (to be updated)
+└── README.md                    # Project documentation
+
 ```
 
 ## Setup
