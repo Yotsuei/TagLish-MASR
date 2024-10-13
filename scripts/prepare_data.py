@@ -1,80 +1,49 @@
+# prepare_data.py
+
 import os
-import torchaudio
-import numpy as np
-from sklearn.model_selection import train_test_split
+import random
+from shutil import copyfile
+from src.utils.audio_utils import load_audio  # Using for audio validation or preview if needed
 
-# Directory paths
-RAW_DATA_DIR = 'data/raw/'
-PROCESSED_DATA_DIR = 'data/processed/'
-TRAIN_DIR = os.path.join(PROCESSED_DATA_DIR, 'train/')
-TEST_DIR = os.path.join(PROCESSED_DATA_DIR, 'test/')
+def train_test_split(data_dir, train_dir, test_dir, split_ratio=0.8, seed=42):
+    """
+    Split the dataset into training and testing sets based on the given ratio.
 
-# Sample rate to which audio files will be resampled (Wav2Vec2 model expects 16kHz)
-TARGET_SAMPLE_RATE = 16000
-
-def load_audio(file_path):
-    """Load an audio file."""
-    waveform, sample_rate = torchaudio.load(file_path)
-    return waveform, sample_rate
-
-def resample_audio(waveform, orig_sample_rate, target_sample_rate=TARGET_SAMPLE_RATE):
-    """Resample audio to target sample rate."""
-    if orig_sample_rate != target_sample_rate:
-        resampler = torchaudio.transforms.Resample(orig_sample_rate, target_sample_rate)
-        waveform = resampler(waveform)
-    return waveform
-
-def normalize_audio(waveform):
-    """Normalize audio to be between -1 and 1."""
-    return waveform / waveform.abs().max()
-
-def prepare_and_save(file_name, waveform, sample_rate, save_dir):
-    """Process and save audio data."""
-    # Resample the audio
-    waveform = resample_audio(waveform, sample_rate)
-    # Normalize the audio
-    waveform = normalize_audio(waveform)
+    :param data_dir: Directory with the original audio files.
+    :param train_dir: Directory where the training split will be saved.
+    :param test_dir: Directory where the test split will be saved.
+    :param split_ratio: Ratio of data to be used for training (e.g., 0.8 means 80% training).
+    :param seed: Random seed for reproducibility.
+    """
+    random.seed(seed)
     
-    # Ensure the save directory exists
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    # Get list of all files in the data directory
+    all_files = os.listdir(data_dir)
     
-    # Save the processed audio
-    save_path = os.path.join(save_dir, file_name)
-    torchaudio.save(save_path, waveform, TARGET_SAMPLE_RATE)
-    print(f"Saved processed audio: {save_path}")
-
-def split_data(file_names):
-    """Split the data into train and test sets."""
-    train_files, test_files = train_test_split(file_names, test_size=0.2, random_state=42)
-    return train_files, test_files
-
-def prepare_data():
-    """Main function to prepare data."""
-    if not os.path.exists(PROCESSED_DATA_DIR):
-        os.makedirs(PROCESSED_DATA_DIR)
+    # Shuffle and split files
+    random.shuffle(all_files)
+    split_idx = int(len(all_files) * split_ratio)
     
-    # List all .wav audio files in the raw data directory
-    audio_files = [file for file in os.listdir(RAW_DATA_DIR) if file.endswith(('.mp3', '.flac', '.ogg', '.wav'))]
-    
-    # Split the data into train and test sets
-    train_files, test_files = split_data(audio_files)
-    
-    # Process and save the train data
-    print("Processing train data...")
-    for file_name in train_files:
-        file_path = os.path.join(RAW_DATA_DIR, file_name)
-        waveform, sample_rate = load_audio(file_path)
-        prepare_and_save(file_name, waveform, sample_rate, TRAIN_DIR)
+    train_files = all_files[:split_idx]
+    test_files = all_files[split_idx:]
 
-    # Process and save the test data
-    print("Processing test data...")
-    for file_name in test_files:
-        file_path = os.path.join(RAW_DATA_DIR, file_name)
-        waveform, sample_rate = load_audio(file_path)
-        prepare_and_save(file_name, waveform, sample_rate, TEST_DIR)
+    # Create directories if they don't exist
+    os.makedirs(train_dir, exist_ok=True)
+    os.makedirs(test_dir, exist_ok=True)
 
-    print("Data preparation and splitting completed!")
+    # Copy files to respective directories
+    for file in train_files:
+        copyfile(os.path.join(data_dir, file), os.path.join(train_dir, file))
 
-if __name__ == "__main__":
-    prepare_data()
+    for file in test_files:
+        copyfile(os.path.join(data_dir, file), os.path.join(test_dir, file))
+
+    print(f"Training data size: {len(train_files)}")
+    print(f"Test data size: {len(test_files)}")
+
+# Example usage: split data and prepare directories
+data_dir = "data/raw"
+train_dir = "data/processed/train"
+test_dir = "data/processed/test"
+
+train_test_split(data_dir, train_dir, test_dir)

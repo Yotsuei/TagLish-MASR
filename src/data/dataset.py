@@ -1,40 +1,37 @@
+# dataset.py
+
 import os
-import torch
 from torch.utils.data import Dataset
-import torchaudio
+from src.utils.audio_utils import load_audio, audio_to_tensor, normalize_audio
 
 class SpeechDataset(Dataset):
-    def __init__(self, data_dir, transform=None):
+    def __init__(self, data_dir, file_list, transform=None):
         """
-        Args:
-            data_dir (str): Directory with all the audio files.
-            transform (callable, optional): Optional transform to be applied
-                                            on a sample.
+        Custom dataset for loading audio data.
+
+        :param data_dir: Directory where audio files are located.
+        :param file_list: List of audio file names to be used in the dataset.
+        :param transform: Optional transforms to be applied on the audio (e.g., augmentation).
         """
         self.data_dir = data_dir
-        self.audio_files = [f for f in os.listdir(data_dir) if f.endswith(('.mp3', '.flac', '.ogg', '.wav'))]
+        self.file_list = file_list
         self.transform = transform
 
     def __len__(self):
-        return len(self.audio_files)
+        return len(self.file_list)
 
     def __getitem__(self, idx):
-        audio_path = os.path.join(self.data_dir, self.audio_files[idx])
-        waveform, sample_rate = torchaudio.load(audio_path)
+        audio_path = os.path.join(self.data_dir, self.file_list[idx])
+        
+        # Load audio using the utility function
+        audio, sr = load_audio(audio_path)
+        
+        # Convert to tensor and normalize
+        audio_tensor = audio_to_tensor(audio)
+        normalized_audio = normalize_audio(audio_tensor)
 
-        sample = {
-            'waveform': waveform,
-            'sample_rate': sample_rate,
-            'file_name': self.audio_files[idx]
-        }
-
+        # Apply any transformations (if provided)
         if self.transform:
-            sample = self.transform(sample)
+            normalized_audio = self.transform(normalized_audio)
 
-        return sample
-
-# Example usage
-if __name__ == "__main__":
-    dataset = SpeechDataset(data_dir="data/processed/train")
-    sample = dataset[0]
-    print(f"Sample waveform shape: {sample['waveform'].shape}, file name: {sample['file_name']}")
+        return normalized_audio, sr

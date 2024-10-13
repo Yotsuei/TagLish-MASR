@@ -1,39 +1,39 @@
 import torchaudio
-import os
+from torchaudio.transforms import Resample
 
 class AudioPreprocessor:
-    def __init__(self, sample_rate=16000):
+    def __init__(self, sample_rate=16000, normalize=True):
+        """
+        Initializes the preprocessor with a target sample rate and normalization option.
+        :param sample_rate: The target sample rate for resampling audio.
+        :param normalize: Whether to normalize the audio waveform.
+        """
         self.sample_rate = sample_rate
+        self.normalize = normalize
 
-    def extract_features(self, waveform):
+    def process(self, waveform, input_sample_rate):
         """
-        Extract features from waveform. 
-        For now, this is a placeholder. You can integrate MFCCs, Mel-spectrogram, etc. if needed.
+        Applies the preprocessing steps like resampling and normalization.
+        :param waveform: The raw audio waveform tensor.
+        :param input_sample_rate: The sample rate of the input audio.
+        :return: Processed waveform.
         """
-        # Example: Mel-spectrogram extraction
-        mel_spectrogram = torchaudio.transforms.MelSpectrogram(
-            sample_rate=self.sample_rate, 
-            n_mels=128
-        )
-        return mel_spectrogram(waveform)
-    
-    def preprocess(self, audio_path):
-        """
-        Load audio, resample if needed, and extract features.
-        """
-        waveform, sample_rate = torchaudio.load(audio_path)
-        
-        # Resample if necessary (resample is already done in prepare_data.py)
-        if sample_rate != self.sample_rate:
-            resampler = torchaudio.transforms.Resample(sample_rate, self.sample_rate)
+        # Resample if input sample rate is different from the desired sample rate
+        if input_sample_rate != self.sample_rate:
+            resampler = Resample(input_sample_rate, self.sample_rate)
             waveform = resampler(waveform)
-        
-        features = self.extract_features(waveform)
-        return features
 
-# Example usage
-if __name__ == "__main__":
-    preprocessor = AudioPreprocessor(sample_rate=16000)
-    audio_path = "path_to_audio_file.wav"
-    features = preprocessor.preprocess(audio_path)
-    print("Extracted features:", features.shape)
+        # Normalize the waveform to the range [-1, 1]
+        if self.normalize:
+            waveform = self._normalize_waveform(waveform)
+
+        return waveform
+
+    def _normalize_waveform(self, waveform):
+        """
+        Normalizes the waveform to have values between -1 and 1.
+        :param waveform: The raw waveform tensor.
+        :return: Normalized waveform tensor.
+        """
+        return waveform / waveform.abs().max()
+
