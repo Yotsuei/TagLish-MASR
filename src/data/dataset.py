@@ -12,7 +12,7 @@ class SpeechDataset(Dataset):
                                             on a sample.
         """
         self.data_dir = data_dir
-        self.audio_files = [f for f in os.listdir(data_dir) if f.endswith(('.m4a', '.wav'))]
+        self.audio_files = [f for f in os.listdir(data_dir) if f.endswith(('.mp3', '.flac', '.ogg', '.wav'))]
         self.transform = transform
 
     def __len__(self):

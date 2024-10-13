@@ -55,7 +55,7 @@ def prepare_data():
         os.makedirs(PROCESSED_DATA_DIR)
     
     # List all .wav audio files in the raw data directory
-    audio_files = [file for file in os.listdir(RAW_DATA_DIR) if file.endswith(('.m4a', '.wav'))]
+    audio_files = [file for file in os.listdir(RAW_DATA_DIR) if file.endswith(('.mp3', '.flac', '.ogg', '.wav'))]
     
     # Split the data into train and test sets
     train_files, test_files = split_data(audio_files)
