@@ -1,81 +1,71 @@
-# Project Configuration for TagLish: Fine-Tuning Wav2Vec Model
+# General project configurations
+project:
+  name: "TagLish: Fine-Tuning Wav2Vec Model with Speaker Diarization"
+  version: "1.0"
+  python_version: "3.12.6"
 
-# General Settings
-project_name: "TagLish"
-version: "1.0"
-description: "Fine-Tuning Wav2Vec Model for Code-Switched Speech Recognition"
-
-# Paths
+# Paths for data, models, and outputs
 paths:
   raw_data: "data/raw/"
   processed_data: "data/processed/"
-  features_data: "data/features/"
-  model_checkpoints: "models/checkpoints/"
-  pretrained_models: "models/pretrained/"
-  audio_files: "data/raw/audio/"   # Path to the raw audio files
-  config_file: "config/config.yaml"
-  tokenizer_dir: "models/pretrained/tokenizer/"  # Tokenizer storage path
+  features: "data/features/"
+  pretrained_model: "models/pretrained/wav2vec2-large-xlsr-53/"
+  checkpoints: "models/checkpoints/"
+  logs: "logs/"
+  results: "results/"
+  tokenizer: "data/tokenizer/"
+  audio_utils: "src/utils/audio_utils.py"
+  model_config: "config/config.yaml"
 
-# Wav2Vec Model Configuration
-wav2vec:
-  model_name: "facebook/wav2vec2-large-xlsr-53"
-  fine_tune: true
-  num_labels: 2  # Number of output classes for Tagalog-English
-  dropout_rate: 0.1  # Dropout rate for regularization
+# Model configurations
+model:
+  wav2vec2:
+    pretrained_model_path: "models/pretrained/wav2vec2-large-xlsr-53/"
+    tokenizer_path: "data/tokenizer/"
+    use_pretrained: true
+    sample_rate: 16000  # Ensure all audio is resampled to 16kHz
+    output_hidden_states: false
+  speaker_diarization:
+    x_vector_model_path: "models/x-vector/"
+    tdnn_architecture: "small"  # Small version of TDNN for speaker diarization
+    use_pretrained: false  # True if you want to load a pretrained speaker diarization model
+    num_speakers: 2  # Default assumption, can be dynamic during clustering
 
-# Training Configuration
+# Training configurations
 training:
-  epochs: 20  # Number of training epochs
-  batch_size: 16  # Batch size for training
-  learning_rate: 5e-5  # Learning rate
-  weight_decay: 0.01  # Weight decay for optimizer
-  validation_split: 0.1  # Fraction of the dataset to be used for validation
-  use_gpu: true  # Set to true to use GPU if available
-  early_stopping:
-    patience: 3  # Number of epochs with no improvement after which training will be stopped
-    delta: 0.001  # Minimum change to qualify as an improvement
+  epochs: 30
+  batch_size: 16
+  learning_rate: 3e-5
+  validation_split: 0.2
+  optimizer: "adam"
+  gradient_accumulation_steps: 2
+  early_stopping: true
+  early_stopping_patience: 5
+  seed: 42
 
-# Speaker Diarization Configuration
-speaker_diarization:
-  use_x_vector: true  # Enable x-vector speaker diarization
-  num_speakers: 2  # Number of speakers to identify (adjust as needed)
-  embedding_dim: 512  # Dimensionality of x-vector embeddings
-  distance_threshold: 0.5  # Distance threshold for speaker clustering
+# GPU configurations
+gpu:
+  use_gpu: true  # Automatically switch to GPU if available
+  device: "cuda"  # "cuda" for GPU, "cpu" for fallback
+  mixed_precision: true  # Enable if mixed-precision training is supported
 
-# Preprocessing Configuration
+# Validation & Checkpoints
+validation:
+  evaluate_every: 500  # Evaluate the model after every 500 steps
+  save_best_only: true  # Only save the best checkpoint
+  checkpoint_dir: "models/checkpoints/"
+
+# Data Preprocessing Configurations
 preprocessing:
-  sample_rate: 16000  # Resample audio to 16 kHz
-  vad: true  # Apply voice activity detection
-  normalize_amplitude: true  # Normalize audio amplitude
+  resample_rate: 16000
+  vad: true  # Apply Voice Activity Detection (VAD) to remove non-speech segments
+  normalize: true
+  mfcc_features:
+    enabled: true
+    n_mfcc: 23  # Number of MFCCs to extract
 
-# Feature Extraction Configuration
-feature_extraction:
-  use_mfcc: true  # Use MFCCs as input features
-  frame_length: 0.025  # Frame length of 25ms
-  frame_step: 0.010  # Step of 10ms
-  num_mfcc: 23  # Number of MFCC features per frame
-
-# X-vector Extraction Configuration
-x_vector_extraction:
-  use_tdnn: true  # Use TDNN architecture for x-vector extraction
-  tdnn_training_dataset: "VoxCeleb"  # Dataset for TDNN training (using transfer learning)
-  simplified_tdnn: true  # Use a simplified TDNN architecture
-  embedding_layer: "tdnn_embedding"  # Layer from which to extract x-vectors
-  data_augmentation: true  # Enable data augmentation to help with limited dataset
-  regularization:
-    dropout: 0.5  # Dropout rate for regularization
-    weight_decay: 0.01  # Weight decay to prevent overfitting
-
-# Clustering Configuration
+# Diarization Clustering Configurations
 clustering:
-  use_data_augmentation: true  # Use data augmentation techniques
-  clustering_algorithm: "AHC"  # Clustering algorithm (Agglomerative Hierarchical Clustering)
-  plda_scoring: true  # Use PLDA scoring for measuring similarity between x-vectors
-
-# Logging and Checkpointing
-logging:
-  log_file: "logs/training.log"  # Path to the log file
-  save_checkpoints: true  # Save model checkpoints during training
-
-# Seed for Reproducibility
-seed: 42
+  method: "ahc"  # Agglomerative Hierarchical Clustering
+  plda: true  # Use PLDA for scoring
+  threshold: 0.5  # Clustering threshold

@@ -1,15 +1,31 @@
-# requirements.txt
+# Essential libraries
+torch>=2.0.1
+transformers>=4.28.1
+torchaudio>=2.0.1
+datasets>=2.12.1
+scikit-learn>=1.2.2
+scipy
 
-torch>=2.0  # For model training, with GPU support
-torchaudio>=2.0  # For working with audio data
-transformers>=4.30.0  # For using the Wav2Vec2 model
-datasets>=2.8.0  # For managing datasets, loading and preprocessing
-scikit-learn>=1.2.0  # For diarization, clustering, and evaluation
-pydub>=0.25.1  # For audio file processing
-soundfile>=0.11.0  # For reading and writing audio files
-librosa>=0.10.0  # For additional audio feature extraction
-tensorboard>=2.10  # For logging training progress
-numpy>=1.23.0  # General numerical computation
-scipy>=1.10.0  # For signal processing and clustering tasks
-tqdm>=4.64.0  # For progress bars during data loading and training
-pytorch_lightning>=2.0  # Optional: Simplify training loops and GPU handling
+# Audio processing
+librosa>=0.10.0
+webrtcvad>=2.0.10
+resampy
+
+# Diarization and speaker recognition
+kaldiio>=2.18.0
+speechbrain>=0.5.13  # Optional, for additional diarization support
+# kaldi-python>=5.5.3  # For Kaldi-based processing
+
+# Utility libraries
+numpy>=1.25.1
+pandas>=2.0.3
+matplotlib>=3.7.1
+tqdm>=4.65.0
+pytorch-lightning>=2.0.0
+
+# Logging and configuration
+PyYAML>=6.0
+tensorboard>=2.14.0
+
+# Other dependencies
+pydub>=0.25.1  # Audio file manipulation
