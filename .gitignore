@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore the Wav2Vec2 model directory
+models/pretrained/wav2vec2-large-xlsr-53/
+
 # Distribution / packaging
 .Python
 env/
