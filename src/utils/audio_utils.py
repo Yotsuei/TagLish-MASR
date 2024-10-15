@@ -9,15 +9,14 @@ import matplotlib.pyplot as plt
 
 # Function to resample audio to a target sample rate
 def resample_audio(audio_path, target_sample_rate=16000):
-    """Load and resample audio to target sample rate."""
-    audio, sample_rate = librosa.load(audio_path, sr=None)  # Load with original sample rate
+    """Resample audio to the target sample rate while maintaining the original speed."""
+    audio, sample_rate = librosa.load(audio_path, sr=None, dtype=np.float32)  # Load with original sample rate
     if sample_rate != target_sample_rate:
         audio = librosa.resample(audio, orig_sr=sample_rate, target_sr=target_sample_rate, res_type='kaiser_best')
         print(f"Resampled audio from {sample_rate} Hz to {target_sample_rate} Hz.")
     else:
         print(f"No resampling needed. Audio is already at {target_sample_rate} Hz.")
     return audio, target_sample_rate
-
 
 # Function to apply voice activity detection (VAD)
 def preprocess_audio(audio_path, target_sample_rate=16000, vad_enabled=True, normalize=True):
@@ -46,33 +45,31 @@ def preprocess_audio(audio_path, target_sample_rate=16000, vad_enabled=True, nor
     return audio, sample_rate
 
 def apply_vad(audio, sample_rate, aggressiveness=0):
-    """Basic Voice Activity Detection using energy threshold."""
-    frame_length = 1024  # Length of each frame
-    hop_length = 512     # Hop length between frames
-    energy_threshold = 0.6  # Adjust based on testing
+    """Apply simple VAD based on energy threshold without windowing."""
+    frame_length = int(0.025 * sample_rate)  # 25ms frame length (400 samples at 16kHz)
+    hop_length = int(0.01 * sample_rate)     # 10ms hop length (~160 samples at 16kHz)
+    energy_threshold = 0.5  # Energy threshold for VAD detection (adjustable based on testing)
 
-    # Compute short-time energy
+    # Compute short-time energy of frames
     energy = np.array([
         np.sum(np.square(audio[i:i + frame_length]))
         for i in range(0, len(audio), hop_length)
         if i + frame_length <= len(audio)
     ])
 
-    # Detect speech frames
+    # Detect speech frames based on energy
     speech_frames = energy > energy_threshold
     if not np.any(speech_frames):
         print("No speech frames detected based on energy threshold.")
         return np.array([])
 
-    # Reconstruct audio from detected speech frames
-    detected_audio = []
-    for i in range(len(speech_frames)):
-        if speech_frames[i]:
-            start = i * hop_length
-            end = start + frame_length
-            detected_audio.extend(audio[start:end])
+    # Reconstruct the audio from the speech frames without modifying them
+    detected_audio = np.concatenate([
+        audio[i * hop_length:(i * hop_length) + frame_length]
+        for i in range(len(speech_frames)) if speech_frames[i]
+    ])
 
-    return np.array(detected_audio)
+    return detected_audio
 
 # Generator to split audio into frames
 def frame_generator(audio, sample_rate, frame_duration_ms):
@@ -85,19 +82,21 @@ def frame_generator(audio, sample_rate, frame_duration_ms):
 
 # Function to normalize audio amplitude
 def normalize_audio(audio):
-    """Normalize audio to the range [-1, 1]."""
     if len(audio) == 0:
         return audio
     max_abs_value = np.max(np.abs(audio))
     if max_abs_value > 0:
-        normalized_audio = audio / max_abs_value
+        normalized_audio = audio / max_abs_value  # Avoid clipping by dividing by max abs value
         return normalized_audio
     return audio
+
 
 # Function to save the processed audio
 def save_audio(audio, sample_rate, file_path):
     """Save the processed audio back to disk."""
-    sf.write(file_path, audio, sample_rate)
+    sf.write(file_path, audio, sample_rate, subtype='FLOAT')
+    print(f"Audio saved at {sample_rate} Hz.")
+
 
 def plot_audio_waveform(audio, sample_rate, title='Audio Waveform'):
     """Plot the waveform of the audio signal."""
