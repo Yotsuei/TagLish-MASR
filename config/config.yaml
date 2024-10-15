@@ -13,15 +13,18 @@ paths:
   checkpoints: "models/checkpoints/"
   logs: "logs/"
   results: "results/"
-  tokenizer: "data/tokenizer/"
+  tokenizer: "models/tokenizer/"  # Updated path for the custom tokenizer
   audio_utils: "src/utils/audio_utils.py"
   model_config: "config/config.yaml"
-
+  custom_vocab_file: "data/tokenizer/vocab.json"  # Path to the custom vocabulary file
+  merges_file: "data/tokenizer/merges.txt"  # Path to the BPE merges file if using BPE
+  
 # Model configurations
 model:
   wav2vec2:
     pretrained_model_path: "models/pretrained/wav2vec2-large-xlsr-53/"
-    tokenizer_path: "data/tokenizer/"
+    tokenizer_path: "models/tokenizer/"  # Path to custom tokenizer
+    vocab_size: 32  # Adjusted vocab size based on your needs
     use_pretrained: true
     sample_rate: 16000  # Ensure all audio is resampled to 16kHz
     output_hidden_states: false
@@ -63,6 +66,13 @@ preprocessing:
   mfcc_features:
     enabled: true
     n_mfcc: 23  # Number of MFCCs to extract
+
+# Tokenizer Configuration
+tokenizer:
+  vocab_size: 32
+  vocab_file: "data/tokenizer/vocab.json"  # Path to the custom vocabulary file
+  merges_file: "data/tokenizer/merges.txt"  # Path to the BPE merges file
+  type: "bpe"  # Type of tokenizer (can be 'bpe' for Byte Pair Encoding)
 
 # Diarization Clustering Configurations
 clustering:
